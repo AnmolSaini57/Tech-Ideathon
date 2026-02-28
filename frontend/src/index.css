@@ -515,11 +515,6 @@
   }
 }
 
-/* Dialog overlay with backdrop blur */
-div[role="dialog"] {
-  background: transparent;
-}
-
 /* Ensure the dialog overlay shows the faded background */
 [data-radix-dialog-overlay] {
   background: rgba(0, 0, 0, 0.2) !important;

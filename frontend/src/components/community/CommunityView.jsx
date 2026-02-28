@@ -14,9 +14,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@components/ui/dialog';
-import { 
-  Users, 
-  MessageCircle, 
+import {
+  Users,
+  MessageCircle,
   Send,
   UserPlus,
   ArrowLeft,
@@ -347,7 +347,7 @@ const CommunityView = ({ userRole = 'student' }) => {
                             {displayName}
                             {message.sender_role !== 'student' && (
                               <span className="ml-2 inline-block bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 text-[10px] px-2 py-0.5 rounded-full font-semibold">
-                                 {message.sender_role}
+                                {message.sender_role}
                               </span>
                             )}
                           </p>
@@ -357,7 +357,7 @@ const CommunityView = ({ userRole = 'student' }) => {
                             {displayName}
                             {message.sender_role !== 'student' && (
                               <span className="ml-2 inline-block bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 text-[10px] px-2 py-0.5 rounded-full font-semibold">
-                                 {message.sender_role}
+                                {message.sender_role}
                               </span>
                             )}
                           </p>
@@ -373,7 +373,7 @@ const CommunityView = ({ userRole = 'student' }) => {
                   );
                 })}
                 {typingUsers.size > 0 && (
-                    <div className={`flex items-center space-x-2 text-sm ${theme.colors.muted}`}>
+                  <div className={`flex items-center space-x-2 text-sm ${theme.colors.muted}`}>
                     <span className="w-2 h-2 rounded-full bg-gray-400 animate-bounce" />
                     <span className="w-2 h-2 rounded-full bg-gray-400 animate-bounce delay-100" />
                     <span className="w-2 h-2 rounded-full bg-gray-400 animate-bounce delay-200" />
@@ -500,7 +500,7 @@ const CommunityView = ({ userRole = 'student' }) => {
           <Card className={`${theme.colors.card} border-2 border-dashed border-gray-300 p-8`}>
             <div className="text-center">
               <Users className="w-16 h-16 mx-auto mb-4 text-gray-400" />
-                  <h3 className={`text-xl font-semibold mb-2 ${theme.colors.text}`}>{t('noCommunitiesAvailable') || 'No communities available'}</h3>
+              <h3 className={`text-xl font-semibold mb-2 ${theme.colors.text}`}>{t('noCommunitiesAvailable') || 'No communities available'}</h3>
             </div>
           </Card>
         ) : (
@@ -565,7 +565,7 @@ const CommunityView = ({ userRole = 'student' }) => {
       </div>
 
       <Dialog open={isJoinDialogOpen} onOpenChange={setIsJoinDialogOpen}>
-        <DialogContent className="w-[95vw] sm:max-w-[425px] bg-white">
+        <DialogContent className="w-[95vw] sm:max-w-[425px] bg-white dark:bg-slate-900 dark:text-slate-100 border dark:border-slate-700">
           <DialogHeader>
             <DialogTitle className="flex items-center text-lg sm:text-xl">
               <UserPlus className="w-5 h-5 mr-2 text-green-500 flex-shrink-0" />

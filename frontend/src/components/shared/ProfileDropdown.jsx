@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
@@ -58,12 +58,14 @@ const ProfileDropdown = () => {
   const [passwordError, setPasswordError] = useState('');
   const [passwordLoading, setPasswordLoading] = useState(false);
 
-  // Removed localStorage-based regeneration count; now session-only.
+  // Only reset regeneration count on first mount, NOT when user changes
+  const hasInitialized = useRef(false);
   useEffect(() => {
-    if (user) {
+    if (!hasInitialized.current) {
+      hasInitialized.current = true;
       setRegenerationCount(0);
     }
-  }, [user]);
+  }, []);
 
   const handleGenerateUsername = () => {
     setIsUsernameDialogOpen(true);
@@ -75,7 +77,7 @@ const ProfileDropdown = () => {
     if (regenerationCount >= 3) {
       return; // Should not reach here due to UI restrictions
     }
-    
+
     const username = generateRandomUsername();
     setNewUsername(username);
   };
@@ -86,11 +88,11 @@ const ProfileDropdown = () => {
       // Update user profile in localStorage only
       const updatedUser = { ...(user || {}), username: newUsername };
       localStorage.setItem('user', JSON.stringify(updatedUser));
+      // Update state without triggering regeneration count reset
       setUser(updatedUser);
 
       // Update regeneration count (session only)
-      const newCount = regenerationCount + 1;
-      setRegenerationCount(newCount);
+      setRegenerationCount(prev => prev + 1);
 
       setIsUsernameDialogOpen(false);
       setNewUsername('');
@@ -157,8 +159,8 @@ const ProfileDropdown = () => {
             </Avatar>
           </Button>
         </DropdownMenuTrigger>
-        
-          <DropdownMenuContent className="w-64" align="end" forceMount>
+
+        <DropdownMenuContent className="w-64" align="end" forceMount>
           <DropdownMenuLabel className="font-normal">
             <div className="flex flex-col space-y-2">
               <p className="text-sm font-medium leading-none">{user?.name}</p>
@@ -177,7 +179,7 @@ const ProfileDropdown = () => {
               <p className="text-xs leading-none text-muted-foreground">{user?.email}</p>
             </div>
           </DropdownMenuLabel>
-          
+
           <DropdownMenuSeparator />
 
           {user?.role === 'student' ? (
@@ -219,8 +221,8 @@ const ProfileDropdown = () => {
           <DropdownMenuItem
             className="cursor-pointer text-red-600 hover:text-red-700"
             onClick={async () => {
-              try { await logout(); } catch {}
-              try { localStorage.removeItem('user'); } catch {}
+              try { await logout(); } catch { }
+              try { localStorage.removeItem('user'); } catch { }
               navigate('/');
             }}
           >
@@ -242,18 +244,18 @@ const ProfileDropdown = () => {
               Your new username will be displayed in all community chat messages going forward.
             </DialogDescription>
           </DialogHeader>
-          
+
           <div className="py-6">
             <div className="text-center space-y-4">
               <div className="p-6 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-lg border border-blue-200">
                 <p className="text-sm text-gray-600 mb-2">Your username is:</p>
                 <p className="text-2xl font-bold text-blue-600">{newUsername}</p>
               </div>
-              
+
               <p className="text-sm text-gray-600">
                 Do you want to keep it or generate another?
               </p>
-              
+
               {regenerationCount < 2 && (
                 <p className="text-xs text-orange-600">
                   You have {3 - regenerationCount - 1} regeneration attempts left after this.
@@ -261,22 +263,31 @@ const ProfileDropdown = () => {
               )}
             </div>
           </div>
-          
-          <DialogFooter>
-            <div className="flex gap-3 w-full">
-              <Button 
-                variant="outline" 
+
+          <DialogFooter className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 sm:gap-4 mt-4">
+            <Button
+              variant="ghost"
+              onClick={handleCloseDialog}
+              disabled={isLoading}
+              className="w-full sm:w-auto"
+            >
+              <X className="w-4 h-4 mr-2" />
+              Cancel
+            </Button>
+            <div className="flex gap-2 w-full sm:w-auto">
+              <Button
+                variant="outline"
                 onClick={handleRegenerateUsername}
                 disabled={regenerationCount >= 2 || isLoading}
-                className="flex-1"
+                className="flex-1 sm:flex-none"
               >
                 <RefreshCw className="w-4 h-4 mr-2" />
                 Regenerate
               </Button>
-              <Button 
+              <Button
                 onClick={handleKeepUsername}
                 disabled={isLoading}
-                className="flex-1 bg-green-500 hover:bg-green-600 text-white"
+                className="flex-1 sm:flex-none bg-green-500 hover:bg-green-600 text-white"
               >
                 {isLoading ? (
                   <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
@@ -286,15 +297,6 @@ const ProfileDropdown = () => {
                 Keep
               </Button>
             </div>
-            <Button 
-              variant="ghost" 
-              onClick={handleCloseDialog}
-              disabled={isLoading}
-              className="w-full mt-2"
-            >
-              <X className="w-4 h-4 mr-2" />
-              Cancel
-            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

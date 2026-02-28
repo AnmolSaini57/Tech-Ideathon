@@ -20,10 +20,10 @@ import memoryService from '@services/memoryService';
  */
 const formatDate = (dateString) => {
   const date = new Date(dateString);
-  return date.toLocaleDateString('en-US', { 
-    month: 'short', 
-    day: '2-digit', 
-    year: 'numeric' 
+  return date.toLocaleDateString('en-US', {
+    month: 'short',
+    day: '2-digit',
+    year: 'numeric'
   });
 };
 
@@ -51,14 +51,14 @@ const MemoryCard = ({ memory, isLeft, onDelete }) => {
   return (
     <div className={`flex items-start gap-12 ${isLeft ? 'flex-row' : 'flex-row-reverse'}`}>
       {/* Polaroid Photo */}
-      <div 
+      <div
         className="bg-white p-4 pb-14 shadow-lg transition-transform duration-300 hover:scale-105 hover:shadow-xl relative group"
-        style={{ 
+        style={{
           transform: `rotate(${rotation}deg)`,
         }}
       >
-        <img 
-          src={memory.imageUrl} 
+        <img
+          src={memory.imageUrl}
           alt={memory.title}
           className="w-64 h-64 object-cover"
         />
@@ -73,9 +73,9 @@ const MemoryCard = ({ memory, isLeft, onDelete }) => {
       </div>
 
       {/* Note Card */}
-      <div 
+      <div
         className="mt-8 pt-6 px-8 pb-8 min-w-[240px] max-w-[300px]"
-        style={{ 
+        style={{
           backgroundColor: '#E8F6FF',
           boxShadow: '0 4px 12px -2px rgba(0, 0, 0, 0.08)'
         }}
@@ -153,7 +153,7 @@ const AddMemoryDialog = ({ onAdd }) => {
       </DialogTrigger>
       <DialogContent className="sm:max-w-lg !bg-white border-0 shadow-2xl">
         <DialogHeader>
-          <DialogTitle 
+          <DialogTitle
             className="text-2xl text-center text-gray-800"
           >
             Add a Memory
@@ -161,7 +161,7 @@ const AddMemoryDialog = ({ onAdd }) => {
         </DialogHeader>
         <div className="space-y-5 pt-4">
           {/* Image Upload */}
-          <div 
+          <div
             className="relative border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors hover:border-[#7EC8E3]"
             style={{ borderColor: '#C5E4F3' }}
           >
@@ -173,9 +173,9 @@ const AddMemoryDialog = ({ onAdd }) => {
             />
             {imagePreview ? (
               <div className="relative">
-                <img 
-                  src={imagePreview} 
-                  alt="Preview" 
+                <img
+                  src={imagePreview}
+                  alt="Preview"
                   className="w-full h-56 object-cover rounded-lg"
                 />
                 <button
@@ -244,17 +244,66 @@ const MemoryWall = () => {
   const { t } = useLanguage();
   const { toast } = useToast();
 
+  // Fallback sample memories (used when backend is unavailable or returns no data)
+  const fallbackMemories = [
+    {
+      id: 1,
+      title: 'FIRST DAY OF SPRING SEMESTER',
+      date: 'Feb 21, 2026',
+      description: 'Started the new semester with so much energy and excitement. Met amazing people in class!',
+      imageUrl: 'https://images.unsplash.com/photo-1523050854058-8df90110c8f1?w=400&h=400&fit=crop',
+      rawDate: '2026-02-21'
+    },
+    {
+      id: 2,
+      title: 'CAMPUS WELLNESS WORKSHOP',
+      date: 'Feb 23, 2026',
+      description: 'Attended the mindfulness and meditation workshop. Learned breathing techniques that really help.',
+      imageUrl: 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=400&h=400&fit=crop',
+      rawDate: '2026-02-23'
+    },
+    {
+      id: 3,
+      title: 'STUDY GROUP SUCCESS',
+      date: 'Feb 25, 2026',
+      description: 'Our study group aced the midterm prep! Teamwork makes the dream work.',
+      imageUrl: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=400&h=400&fit=crop',
+      rawDate: '2026-02-25'
+    },
+    {
+      id: 4,
+      title: 'SUNSET AT THE LAKE',
+      date: 'Feb 27, 2026',
+      description: 'Took a peaceful walk by the campus lake. The sunset was absolutely breathtaking.',
+      imageUrl: 'https://images.unsplash.com/photo-1495616811223-4d98c6e9c869?w=400&h=400&fit=crop',
+      rawDate: '2026-02-27'
+    },
+    {
+      id: 5,
+      title: 'CREATIVE ARTS SHOWCASE',
+      date: 'Feb 28, 2026',
+      description: 'Displayed my artwork at the student showcase. Got wonderful feedback from everyone!',
+      imageUrl: 'https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=400&h=400&fit=crop',
+      rawDate: '2026-02-28'
+    }
+  ];
+
   // Fetch memories from backend
   const fetchMemories = async () => {
     setIsLoading(true);
     try {
       const response = await memoryService.getAllMemories();
-      if (response.success && response.data) {
+      if (response.success && response.data && response.data.length > 0) {
         const transformedMemories = response.data.map(transformMemory);
         setMemories(transformedMemories);
+      } else {
+        // No memories from backend — use fallback sample data
+        setMemories(fallbackMemories);
       }
     } catch (err) {
       console.error('Error fetching memories:', err);
+      // Use fallback sample data when backend is unavailable
+      setMemories(fallbackMemories);
     } finally {
       setIsLoading(false);
     }
@@ -269,11 +318,11 @@ const MemoryWall = () => {
   const handleAddMemory = async (newMemoryData) => {
     try {
       const response = await memoryService.createMemory(newMemoryData);
-      
+
       if (response.success && response.data) {
         const transformedMemory = transformMemory(response.data);
         setMemories([transformedMemory, ...memories]);
-        
+
         toast({
           title: "Memory added!",
           description: "Your memory has been pinned to the wall."
@@ -297,10 +346,10 @@ const MemoryWall = () => {
 
     try {
       const response = await memoryService.deleteMemory(memoryId);
-      
+
       if (response.success) {
         setMemories(memories.filter(m => m.id !== memoryId));
-        
+
         toast({
           title: "Memory deleted",
           description: "Your memory has been removed from the wall."
@@ -335,7 +384,7 @@ const MemoryWall = () => {
           display: none;
         }
       `}</style>
-      
+
       {/* Header */}
       <div className="py-10 px-4 text-center">
         <p className={`${theme.colors.muted} text-lg`}>
@@ -344,9 +393,9 @@ const MemoryWall = () => {
       </div>
 
       {/* Timeline Container with smooth scroll */}
-      <div 
+      <div
         className="relative px-8 pb-24 overflow-y-auto scroll-smooth"
-        style={{ 
+        style={{
           maxHeight: 'calc(100vh - 200px)',
           scrollbarWidth: 'none',
           msOverflowStyle: 'none'
@@ -354,37 +403,37 @@ const MemoryWall = () => {
       >
         <div className="max-w-6xl mx-auto relative memory-scroll">
           {/* Vertical String/Line */}
-          <div 
+          <div
             className="absolute left-1/2 top-0 bottom-0 w-0.5 -translate-x-1/2"
             style={{ backgroundColor: '#C5E4F3' }}
           />
-          
+
           {/* Memory Items */}
           <div className="relative space-y-24">
             {memories.map((memory, index) => {
               const isLeft = index % 2 === 0;
-              
+
               return (
-                <div 
+                <div
                   key={memory.id}
                   className="relative flex justify-center"
                 >
                   {/* Horizontal connector to string */}
-                  <div 
+                  <div
                     className="absolute top-16 h-0.5 z-0"
-                    style={{ 
+                    style={{
                       backgroundColor: '#C5E4F3',
                       width: '120px',
                       left: isLeft ? 'calc(50% - 120px)' : '50%'
                     }}
                   />
-                  
+
                   {/* Offset container for balanced layout */}
-                  <div 
+                  <div
                     className={`${isLeft ? '-translate-x-20' : 'translate-x-20'}`}
                   >
-                    <MemoryCard 
-                      memory={memory} 
+                    <MemoryCard
+                      memory={memory}
                       isLeft={isLeft}
                       onDelete={handleDeleteMemory}
                     />
